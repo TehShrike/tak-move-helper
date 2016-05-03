@@ -1,0 +1,22 @@
+{
+  "name": "tak-move-helper",
+  "version": "1.0.0",
+  "description": "Helper functions for finding valid moves to highlight in a UI probably",
+  "main": "index.js",
+  "dependencies": {
+    "immutability-helper": "2.0.0"
+  },
+  "devDependencies": {
+    "faucet": "0.0.1",
+    "jsmd": "0.3.1",
+    "tape": "4.5.1"
+  },
+  "scripts": {
+    "test": "tape test/*.js"
+  },
+  "keywords": [
+    "tak"
+  ],
+  "author": "TehShrike",
+  "license": "WTFPL"
+}
