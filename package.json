@@ -4,7 +4,8 @@
   "description": "Helper functions for finding valid moves to highlight in a UI probably",
   "main": "index.js",
   "dependencies": {
-    "immutability-helper": "2.0.0"
+    "immutability-helper": "2.0.0",
+    "xtend": "4.0.1"
   },
   "devDependencies": {
     "faucet": "0.0.1",
