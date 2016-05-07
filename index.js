@@ -4,7 +4,6 @@ const extend = require('xtend')
 const getSquare = require('tak-game/get-square')
 const moveIsValid = require('tak-game/move-is-valid')
 const squareIsOwnedBy = require('tak-game/square-is-owned-by')
-// const { topPieceOfSquare: topPieceOfSquareIsCapstone } = require('tak-game/is-capstone')
 const piecesPickedUpFromSquare = require('tak-game/pieces-picked-up-from-square')
 
 module.exports = function(boardState, move) {
@@ -15,7 +14,7 @@ module.exports = function(boardState, move) {
 			return getMoveablePieces(boardState, move)
 		} else if (!move.axis || !move.direction) {
 			return getMoveOptionsNextToStartingSquare(boardState, move)
-		} else if (Array.isArray(move.drops) && move.drops.length > 0) {
+		} else if (Array.isArray(move.drops) && move.drops.length > 1) {
 			return getMoveOptionsAfterStartingAMove(boardState, move)
 		} else {
 			throw new Error(`What kind of move is that?`)
@@ -36,7 +35,6 @@ function getMoveablePieces(boardState, move) {
 function getAllCoordinates(boardState, move) {
 	const size = boardState.size
 
-	console.log('move is', move)
 	const dimensions = rangeOf(size)
 
 	return dimensions.reduce((ary, x) => {
@@ -61,19 +59,20 @@ function ad(axis, direction) {
 	return { axis, direction }
 }
 
-function math(direction, number) {
-	return direction === '-' ? number - 1 : number + 1
+function math(direction, value, increment) {
+	return direction === '-' ? value - increment : value + increment
 }
 
-function dropMoveToCoordinates(move) {
+function findLastDropCoordinates(move) {
 	const coordinates = justCoordinates(move)
-	coordinates[move.axis] = math(move.direction, coordinates[move.axis])
+	const increment = move.drops.length - 1
+	coordinates[move.axis] = math(move.direction, coordinates[move.axis], increment)
 	return coordinates
 }
 
 function getMoveOptionsNextToStartingSquare(boardState, move) {
-	const pickedUp = piecesPickedUpFromSquare(boardState, move)
 	const currentSquareOption = justCoordinates(move)
+	const pickedUp = piecesPickedUpFromSquare(boardState, move)
 	const drops = [0, pickedUp]
 
 	return [
@@ -83,12 +82,19 @@ function getMoveOptionsNextToStartingSquare(boardState, move) {
 		ad('y', '-'),
 	].map(choice => extend(move, choice, { drops }))
 	.filter(move => moveIsValid(boardState, move))
-	.map(dropMoveToCoordinates)
+	.map(findLastDropCoordinates)
 	.concat(currentSquareOption)
 }
 
 function getMoveOptionsAfterStartingAMove(boardState, move) {
-	throw new Error('getMoveOptionsAfterStartingAMove')
+	const options = [findLastDropCoordinates(move)]
+
+	const potentialNextMove = extend(move, { drops: move.drops.concat(1) })
+	const potentialNextCoordinates = findLastDropCoordinates(potentialNextMove)
+	if (moveIsValid(boardState, potentialNextMove)) {
+		options.push(potentialNextCoordinates)
+	}
+	return options
 }
 
 function getValidPlacementSpaces(boardState, move) {

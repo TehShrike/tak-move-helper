@@ -18,10 +18,10 @@ function compare(expectedProperties, move) {
 }
 
 function compareCoordinateArrays(t, actual, expected) {
-	t.equal(actual.length, expected.length)
+	t.equal(actual.length, expected.length, 'Same number of coordinates')
 	t.ok(expected.every(expectedCoordinates => {
 		return actual.findIndex(actualMove => compare(expectedCoordinates, actualMove)) !== -1
-	}))
+	}), 'Same coordinates given')
 }
 
 test('find all valid moveable pieces', t => {
@@ -44,14 +44,8 @@ test('find all valid moveable pieces', t => {
 	t.end()
 })
 
-test('find all places you can move a given square', t => {
+test(`find all places you can move a given square when you haven't picked a direction yet`, t => {
 	const boardState = fewRandomPieces('o')
-
-	const move = {
-		type: 'MOVE',
-		x: 1,
-		y: 2
-	}
 
 	const expected = [
 		xy(0,2),
@@ -60,10 +54,79 @@ test('find all places you can move a given square', t => {
 		xy(1,2)
 	]
 
+	function assert(move) {
+		const actual = getValidPlaceLocations(boardState, move)
+
+		compareCoordinateArrays(t, actual, expected)
+	}
+
+	assert({
+		type: 'MOVE',
+		x: 1,
+		y: 2
+	})
+
+	assert({
+		type: 'MOVE',
+		x: 1,
+		y: 2,
+		drops: []
+	})
+
+	assert({
+		type: 'MOVE',
+		x: 1,
+		y: 2,
+		drops: [1]
+	})
+
+	t.end()
+
+})
+
+test('After starting a move, where can you go next? x+', t => {
+	const boardState = fewRandomPieces('o')
+
+	const move = {
+		type: 'MOVE',
+		x: 1,
+		y: 2,
+		axis: 'x',
+		direction: '+',
+		drops: [1, 1]
+	}
+
+	const expected = [
+		xy(2,2),
+		xy(3,2)
+	]
+
 	const actual = getValidPlaceLocations(boardState, move)
 
 	compareCoordinateArrays(t, actual, expected)
 
 	t.end()
+})
 
+test('After starting a move, where can you go next? x-', t => {
+	const boardState = fewRandomPieces('o')
+
+	const move = {
+		type: 'MOVE',
+		x: 1,
+		y: 2,
+		axis: 'x',
+		direction: '-',
+		drops: [1, 1]
+	}
+
+	const expected = [
+		xy(0,2),
+	]
+
+	const actual = getValidPlaceLocations(boardState, move)
+
+	compareCoordinateArrays(t, actual, expected)
+
+	t.end()
 })
